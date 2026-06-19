@@ -24,7 +24,9 @@ const state = {
   sep:"-",
   caps:false,
   number:false,
+  numberLocked:false,
   symbol:false,
+  symbolLocked:false,
   leet:false,
   limitOn:false,
   maxLen:24,
@@ -118,7 +120,7 @@ countEl.oninput = ()=>{
 
 function toggleBtn(id, key){
   const el = document.getElementById(id);
-  el.onclick = ()=>{ state[key] = !state[key]; el.setAttribute("aria-pressed", state[key]); updateAll(); };
+  el.onclick = ()=>{ state[key] = !state[key]; el.setAttribute("aria-pressed", state[key]); renderTiles(); updateAll(); };
 }
 toggleBtn("caps","caps");
 toggleBtn("num","number");
@@ -152,19 +154,47 @@ const OPEN_SVG = '<svg class="lockicon" viewBox="0 0 24 24" fill="none" stroke="
 function renderTiles(){
   tilesEl.innerHTML="";
   state.chips.forEach((chip, i)=>{
-    const t = document.createElement("div");
-    t.className = "tile" + (chip.locked?" locked":"");
-    t.tabIndex = 0;
-    t.setAttribute("role","button");
-    t.setAttribute("aria-label", chip.word + (chip.locked?", locked. Activate to unlock.":", unlocked. Activate to reroll."));
-    t.innerHTML = '<span class="w">'+chip.word+'</span><span class="meta">'+(chip.locked?LOCK_SVG+'locked':OPEN_SVG+'reroll')+'</span>';
-    // word area rerolls (if unlocked); meta/lock area toggles lock
-    t.querySelector(".w").onclick = (e)=>{ e.stopPropagation(); if(!chip.locked) rerollOne(i); };
-    t.querySelector(".meta").onclick = (e)=>{ e.stopPropagation(); chip.locked=!chip.locked; renderTiles(); };
-    t.onclick = ()=>{ if(!chip.locked) rerollOne(i); };
-    t.onkeydown = (e)=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); if(!chip.locked) rerollOne(i); } };
-    tilesEl.appendChild(t);
+    tilesEl.appendChild(createTile({
+      value: chip.word,
+      locked: chip.locked,
+      type: "word",
+      reroll: ()=>rerollOne(i),
+      toggleLock: ()=>{ chip.locked=!chip.locked; renderTiles(); }
+    }));
   });
+  if(state.number){
+    tilesEl.appendChild(createTile({
+      value: currentNumber,
+      locked: state.numberLocked,
+      type: "number",
+      reroll: rerollNumber,
+      toggleLock: ()=>{ state.numberLocked=!state.numberLocked; renderTiles(); }
+    }));
+  }
+  if(state.symbol){
+    tilesEl.appendChild(createTile({
+      value: currentSymbol,
+      locked: state.symbolLocked,
+      type: "symbol",
+      reroll: rerollSymbol,
+      toggleLock: ()=>{ state.symbolLocked=!state.symbolLocked; renderTiles(); }
+    }));
+  }
+}
+
+function createTile({value, locked, type, reroll, toggleLock}){
+  const t = document.createElement("div");
+  t.className = "tile" + (type==="word"?"":" extra") + (locked?" locked":"");
+  t.tabIndex = 0;
+  t.setAttribute("role","button");
+  t.setAttribute("aria-label", type + " " + value + (locked?", locked. Activate to unlock.":", unlocked. Activate to reroll."));
+  t.innerHTML = '<span class="w"></span><span class="meta">'+(locked?LOCK_SVG+'locked':OPEN_SVG+'reroll')+'</span>';
+  t.querySelector(".w").textContent = value;
+  t.querySelector(".w").onclick = (e)=>{ e.stopPropagation(); if(!locked) reroll(); };
+  t.querySelector(".meta").onclick = (e)=>{ e.stopPropagation(); toggleLock(); };
+  t.onclick = ()=>{ if(locked) toggleLock(); else reroll(); };
+  t.onkeydown = (e)=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); if(locked) toggleLock(); else reroll(); } };
+  return t;
 }
 
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -190,9 +220,16 @@ function tumble(indices, done){
 
 function rerollOne(i){ tumble([i]); }
 
+function randomNumber(){ return String(randInt(90)+10); }
+function randomSymbol(){ return SYMBOLS[randInt(SYMBOLS.length)]; }
+function rerollNumber(){ if(!state.numberLocked){ currentNumber = randomNumber(); renderTiles(); updateAll(); } }
+function rerollSymbol(){ if(!state.symbolLocked){ currentSymbol = randomSymbol(); renderTiles(); updateAll(); } }
+
 document.getElementById("generate").onclick = ()=>{
   const btn = document.getElementById("generate");
   btn.classList.add("spin"); setTimeout(()=>btn.classList.remove("spin"),500);
+  if(state.number && !state.numberLocked) currentNumber = randomNumber();
+  if(state.symbol && !state.symbolLocked) currentSymbol = randomSymbol();
   const idx = state.chips.map((c,i)=>c.locked?-1:i).filter(i=>i>=0);
   tumble(idx);
 };
@@ -209,11 +246,11 @@ function assemble(){
   return tokens.join(sep);
 }
 // keep the appended number stable between renders unless regenerated
-let currentNumber = String(randInt(90)+10);
+let currentNumber = randomNumber();
 
 // symbols broadly accepted by login forms; entropy is computed from the real set size
 const SYMBOLS = "!@#$%^&*?+-=_~";
-let currentSymbol = SYMBOLS[randInt(SYMBOLS.length)];
+let currentSymbol = randomSymbol();
 
 const LEET = {a:"@", s:"$", o:"0"};
 function applyLeet(str){ return state.leet ? str.replace(/[aso]/g, c=>LEET[c]) : str; }
@@ -333,14 +370,6 @@ function updateSay(){
   el.textContent = "🗣  " + t;
   el.style.color = c;
 }
-
-// regenerate the appended number whenever we do a full reroll
-const _genHandler = document.getElementById("generate").onclick;
-document.getElementById("generate").onclick = ()=>{
-  if(state.number) currentNumber = String(randInt(90)+10);
-  if(state.symbol) currentSymbol = SYMBOLS[randInt(SYMBOLS.length)];
-  _genHandler();
-};
 
 // ---- copy ----
 const copyBtn = document.getElementById("copy");

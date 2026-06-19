@@ -86,6 +86,8 @@ body{
   border-color:var(--accent);
 }
 .tile.locked .meta{color:var(--accent);font-weight:600}
+.tile.extra{min-width:62px}
+.tile.extra .w{font-weight:600}
 .tile.tumbling .w{opacity:.55}
 .tile .reroll-note{display:none}
 
