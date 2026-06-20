@@ -51,12 +51,12 @@
     <div class="ctl">
       <p class="ctl-title">Word flavor</p>
       <div class="chips" id="themes"></div>
-      <p class="ctl-note">Bigger pool = more entropy per word. Load the official <b>EFF Diceware list</b> (7,776 words, ~12.9 bits each) for maximum strength. It's a public list by design — the security is in the random pick, never in hiding the words.</p>
+      <p class="ctl-note">Bigger pool = more entropy per word. The built-in <b>EFF</b> flavor uses the official Diceware list (7,776 words, ~12.9 bits each) for maximum strength. Load a custom list only if you want your own word pool.</p>
       <div class="import-row">
-        <label class="import-btn">Load wordlist (.txt)
+        <label class="import-btn">Load custom wordlist (.txt)
           <input type="file" id="wordfile" accept=".txt,text/plain" hidden>
         </label>
-        <a class="import-link" href="https://www.eff.org/files/2016/07/18/eff_large_wordlist.txt" target="_blank" rel="noopener">Get the EFF list →</a>
+        <a class="import-link" href="https://www.eff.org/files/2016/07/18/eff_large_wordlist.txt" target="_blank" rel="noopener">EFF source →</a>
       </div>
       <p class="import-status" id="importStatus"></p>
     </div>

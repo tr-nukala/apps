@@ -36,18 +36,16 @@ technique this is based on, ships a fully public list and is still strong.
 So the lever for more strength isn't a secret list — it's a **bigger** list and **more words**.
 Every word is chosen with `crypto.getRandomValues`, never `Math.random()`.
 
-## Maximum strength: load the EFF list
+## Maximum strength: use the EFF flavor
 
-The bundled pool is ~500 words (~9 bits/word). For maximum strength, load the official
+The friendly themed pool is ~500 words (~9 bits/word). For maximum strength, choose the built-in
 [EFF Diceware long wordlist](https://www.eff.org/files/2016/07/18/eff_large_wordlist.txt)
-(7,776 words, ~12.9 bits/word):
+(7,776 words, ~12.9 bits/word) from *Word flavor*.
 
-1. Download `eff_large_wordlist.txt` from the link above.
-2. In the app, click **Load wordlist (.txt)** under *Word flavor* and pick the file.
-
-It's read entirely in your browser (no upload, no network) and parsed on the spot. A 4-word
-phrase then lands around 52 bits (Strong); 6 words around 78 bits (Excellent). The EFF list is
-licensed CC-BY — credit the EFF if you redistribute it.
+A 4-word EFF phrase lands around 52 bits (Strong); 6 words around 78 bits (Excellent).
+You can still click **Load custom wordlist (.txt)** to use your own plain-text word pool.
+Custom lists are read entirely in your browser (no upload, no network) and parsed on the spot.
+The EFF list is licensed CC-BY — credit the EFF if you redistribute it.
 
 ## Files
 
