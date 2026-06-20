@@ -120,6 +120,7 @@ countEl.oninput = ()=>{
 
 function toggleBtn(id, key){
   const el = document.getElementById(id);
+  el.setAttribute("aria-pressed", state[key]);
   el.onclick = ()=>{ state[key] = !state[key]; el.setAttribute("aria-pressed", state[key]); renderTiles(); updateAll(); };
 }
 toggleBtn("caps","caps");
